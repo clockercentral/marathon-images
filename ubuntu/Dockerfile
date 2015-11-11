@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM ubuntu
+FROM ubuntu:14.04
 #ARG ROOT_PASSWORD=p4ssw0rd
 MAINTAINER Cloudsoft "brooklyn@cloudsoftcorp.com"
 
