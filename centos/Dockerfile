@@ -1,4 +1,3 @@
-[#ftl]
 #
 #  Copyright 2014-2015 by Cloudsoft Corporation Limited
 #
@@ -14,7 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM ${fullyQualifiedImageName}
+FROM centos
+#ARG ROOT_PASSWORD=p4ssw0rd
 MAINTAINER Cloudsoft "brooklyn@cloudsoftcorp.com"
 
 # CLOCKER_VERSION_BELOW
@@ -24,18 +24,10 @@ LABEL version="1.1.0-SNAPSHOT"
 RUN type locale-gen ; if [ "$?" -eq "0" ] ; then locale-gen en_US.UTF-8 ; fi
 
 # setup root account
-RUN echo 'root:${entity.password}' | chpasswd
+RUN echo 'root:p4ssw0rd' | chpasswd
 
 # install sshd
-RUN if [ -x "$(which apt-get)" ] ; then \
-        apt-get update ; \
-        apt-get install -y openssh-server ; \
-    elif [ -x "/usr/bin/yum" ] ; then \
-        yum -y install openssh-server ; \
-    elif [ -x "$(which apk-install)" ] ; then \
-        apk-install openssh ; \
-        sed -i "s/UsePrivilegeSeparation.*/UsePrivilegeSeparation no/g" /etc/ssh/sshd_config ; \
-    fi ; \
+RUN yum -y install openssh-server ; \
     mkdir /var/run/sshd ; \
     chmod 600 /var/run/sshd
 
@@ -49,10 +41,17 @@ RUN if [ -f "/etc/ssh/ssh_host_dsa_key" -a -f "/etc/ssh/ssh_host_rsa_key" ] ; th
 
 # configure sshd to allow login
 RUN sed -i.bk 's/PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config ; \
-    echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+    echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config; \
+    echo 'RSAAuthentication yes' >> /etc/ssh/sshd_config
+
 
 # SSH login fix. Otherwise user is kicked off after login
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd || true
+
+# Create the .ssh directory for mounting
+RUN mkdir /root/.ssh ; \
+    chmod 700 /root/.ssh
+VOLUME [ "/root/.ssh" ]
 
 EXPOSE 22
 
