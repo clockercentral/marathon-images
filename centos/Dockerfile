@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM centos
+FROM centos:7
 #ARG ROOT_PASSWORD=p4ssw0rd
 MAINTAINER Cloudsoft "brooklyn@cloudsoftcorp.com"
 
